@@ -31,7 +31,7 @@ function updateStatus(message: string, showSpinner = true, showWarning = false) 
         (spinner as HTMLElement).style.display = showSpinner ? 'block' : 'none';
     }
     resultArea.style.display = 'none';
-    encryptButton.disabled = true;
+    //.disabled = true;
 }
 
 function showResult(blobUrl: string) {
@@ -285,5 +285,4 @@ resetButton.addEventListener('click', resetUI);
 
 // --- Initial State ---
 resetUI();
-
 
