@@ -1,0 +1,25 @@
+
+/*
+  Este archivo puede estar casi vacío si se usa el CDN de Tailwind.
+  Puedes añadir estilos globales muy específicos aquí si es necesario.
+  La fuente 'Inter' se carga a través del <link> en index.html.
+*/
+body {
+  font-family: 'Inter', sans-serif; /* Asegura que la fuente base sea Inter */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Puedes mantener el estilo del spinner aquí o moverlo al <style> en index.html */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #10B981; /* color primario definido en la config del CDN */
+  animation: spin 1s ease infinite;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
