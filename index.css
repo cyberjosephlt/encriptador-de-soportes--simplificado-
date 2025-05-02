@@ -1,25 +1,42 @@
 
 /*
-  Este archivo puede estar casi vacío si se usa el CDN de Tailwind.
-  Puedes añadir estilos globales muy específicos aquí si es necesario.
-  La fuente 'Inter' se carga a través del <link> en index.html.
+  Global styles and overrides. Tailwind CDN handles most styling.
 */
 body {
-  font-family: 'Inter', sans-serif; /* Asegura que la fuente base sea Inter */
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Puedes mantener el estilo del spinner aquí o moverlo al <style> en index.html */
+/* Spinner styles */
 .spinner {
   border: 4px solid rgba(0, 0, 0, 0.1);
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border-left-color: #10B981; /* color primario definido en la config del CDN */
+  border-left-color: #10B981; /* Tailwind primary color */
   animation: spin 1s ease infinite;
 }
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Footer icon transition */
+.footer-icon svg {
+  transition: transform 0.2s ease-in-out;
+}
+.footer-icon:hover svg {
+  transform: scale(1.15); /* Slightly larger hover effect */
+}
+
+/* Ensure file list doesn't grow indefinitely */
+#file-list {
+  max-height: 10rem; /* Adjust as needed */
+  overflow-y: auto;
+  padding-left: 1.5rem; /* Add some padding for list items */
+}
+#file-list li {
+  margin-bottom: 0.25rem;
+}
+
