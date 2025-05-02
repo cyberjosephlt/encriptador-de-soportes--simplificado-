@@ -160,7 +160,7 @@ function resetDecryptUI() {
     decryptionForm.reset();
     decryptPrivateKeyPem = null; decryptSelectedPairs = []; decryptIsPrivateKeyLoaded = false; decryptArePairsSelected = false;
     decryptFileListElement.innerHTML = ''; decryptFileCountError.style.display = 'none'; decryptPrivateKeyStatus.style.display = 'none'; decryptFolderStatus.style.display = 'none';
-    updateStatus('decrypt', null); decryptResultArea.style.display = 'none'; decryptButton.disabled = true; decryptionForm.style.display = 'block';
+    updateStatus('decrypt', null); decryptResultArea.style.display = 'none'; decryptButton.disabled = false; decryptionForm.style.display = 'block';
 }
 
 // --- Crypto Helper Functions (No changes) ---
