@@ -1,11 +1,10 @@
 
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encriptador de Soportes v1.1</title>
+    <title>Encriptador/Desencriptador de Soportes v1.3</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- JSZip CDN -->
@@ -18,130 +17,145 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
       // Basic Tailwind Config via CDN
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#10B981', // Emerald 500 (Green)
-              secondary: '#3B82F6', // Blue 500
-              'light-bg': '#F9FAFB', // Gray 50
-              'dark-text': '#1F2937', // Gray 800
-              'medium-text': '#4B5563', // Gray 600
-              'light-text': '#6B7280', // Gray 500
-            },
-            fontFamily: {
-               sans: ['Inter', 'sans-serif'],
-            },
-          }
-        }
-      }
+      tailwind.config = { theme: { extend: { colors: { primary: '#10B981', secondary: '#3B82F6', 'light-bg': '#F9FAFB', 'dark-text': '#1F2937', 'medium-text': '#4B5563', 'light-text': '#6B7280', 'tab-inactive': '#D1D5DB', 'tab-active-border': '#10B981', }, fontFamily: { sans: ['Inter', 'sans-serif'], }, } } }
     </script>
     <style>
-      /* Custom styles for file input button */
-      input[type="file"]::file-selector-button {
-        margin-right: 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem; padding-left: 1rem; padding-right: 1rem;
-        border-width: 1px; border-color: transparent; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; color: white; background-color: #3B82F6; /* bg-secondary */
-        cursor: pointer; transition-property: background-color; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms;
-      }
-       input[type="file"]::file-selector-button:hover { background-color: #2563EB; /* hover:bg-blue-700 */ }
-      /* Spinner animation */
-       .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #10B981; animation: spin 1s ease infinite; }
-       @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-       /* Footer icon styles */
-       .footer-icon svg { width: 1.5rem; height: 1.5rem; transition: transform 0.2s ease-in-out; }
-       .footer-icon:hover svg { transform: scale(1.1); }
+      /* Basic styles from previous versions */
+      input[type="file"]::file-selector-button { margin-right: 1rem; padding: 0.5rem 1rem; border: 1px solid transparent; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; color: white; cursor: pointer; transition: background-color 150ms ease-in-out; }
+      .encrypt-input::file-selector-button { background-color: #3B82F6; } /* secondary */
+      .encrypt-input::file-selector-button:hover { background-color: #2563EB; }
+      .decrypt-input::file-selector-button { background-color: #60A5FA; } /* Lighter blue */
+      .decrypt-input::file-selector-button:hover { background-color: #3B82F6; } /* secondary on hover */
+      .spinner { border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #10B981; animation: spin 1s ease infinite; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      .footer-icon svg { width: 1.5rem; height: 1.5rem; transition: transform 0.2s ease-in-out; }
+      .footer-icon:hover svg { transform: scale(1.15); }
+      #file-list, #decrypt-file-list { max-height: 10rem; overflow-y: auto; padding-left: 1.5rem; } #file-list li, #decrypt-file-list li { margin-bottom: 0.25rem; }
+      .tab-button { padding: 1rem 0.25rem; text-align: center; font-size: 0.875rem; font-weight: 500; border-bottom: 3px solid transparent; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; color: #6B7280; }
+      .tab-button:hover { border-color: #D1D5DB; }
+      .tab-button.active { border-color: #10B981; font-weight: 600; color: #1F2937; }
+      .tab-content { display: none; } .tab-content.active { display: block; }
+      .status-text-xs { font-size: 0.75rem; margin-top: 0.25rem; color: #059669; }
     </style>
 </head>
 <body class="bg-light-bg font-sans text-dark-text min-h-screen flex flex-col">
 
     <main class="flex-grow flex items-center justify-center p-4">
-        <div class="bg-white shadow-xl rounded-lg p-6 md:p-10 w-full max-w-2xl">
-            <h1 class="text-2xl md:text-3xl font-bold text-center text-primary mb-6">Encriptador de Soportes</h1>
-            <p class="text-center text-medium-text mb-8">Basado en la Guía de Encriptación (Resolución 2284 de 2023)</p>
+        <div class="bg-white shadow-xl rounded-lg p-6 md:p-10 w-full max-w-3xl">
 
-            <form id="encryption-form" class="space-y-6">
-                 <div>
-                    <label for="public-key-input" class="block text-sm font-medium text-gray-700 mb-1">1. Selecciona Llave Pública RSA (.pem):</label>
-                    <input type="file" id="public-key-input" accept=".pem" required
-                           class="block w-full text-sm text-gray-500 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-primary focus:border-primary file:border-0 file:py-2 file:px-4 file:text-sm file:font-semibold file:text-secondary file:bg-transparent file:rounded-md">
-                     <p id="public-key-status" class="text-xs text-green-600 mt-1 hidden">Llave pública cargada.</p>
-                 </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">2. Selecciona Archivos a Encriptar (máx. 20):</label>
-                    <p class="text-xs text-gray-500 mb-2">Puedes seleccionar una carpeta completa.</p>
-                    <button type="button" id="select-folder-button" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm4 0a2 2 0 012-2h3.172a2 2 0 011.414.586l.828.828H14a1 1 0 011 1v1H5V6z" clip-rule="evenodd" /></svg>
-                        Seleccionar Carpeta
-                    </button>
-                    <input type="file" id="files-input" multiple webkitdirectory directory style="display: none;">
-                     <ul id="file-list" class="mt-2 text-sm text-gray-600 list-disc list-inside max-h-32 overflow-y-auto"></ul>
-                     <p id="file-count-error" class="text-red-500 text-sm mt-1 hidden">Máximo 20 archivos permitidos.</p>
-                     <p id="folder-status" class="text-xs text-green-600 mt-1 hidden">Archivos seleccionados.</p>
-                </div>
-
-                <div class="text-center pt-4">
-                    <button type="submit" id="encrypt-button" disabled
-                            class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-7a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
-                        Encriptar Archivos
-                    </button>
-                </div>
-            </form>
-
-            <!-- Status/Progress Area -->
-            <div id="status-area" class="mt-6 text-center hidden">
-                <div class="flex justify-center items-center mb-2">
-                     <div id="spinner" class="spinner" style="display: none;"></div>
-                 </div>
-                 <p id="status-message" class="text-medium-text font-medium"></p>
-                 <p id="error-message" class="text-red-600 text-sm font-semibold mt-1 hidden"></p>
-                 <p id="warning-message" class="text-orange-600 text-sm font-semibold mt-1 hidden">La interfaz puede congelarse durante la encriptación...</p>
+            <!-- Tab Navigation -->
+            <div class="mb-8 border-b border-gray-200">
+                <nav class="-mb-px flex justify-center space-x-8" aria-label="Tabs">
+                    <button id="encrypt-tab-button" type="button" class="tab-button active">Encriptar</button>
+                    <button id="decrypt-tab-button" type="button" class="tab-button">Desencriptar</button>
+                </nav>
             </div>
 
-            <!-- Result Area -->
-            <div id="result-area" class="mt-6 text-center hidden">
-                <h2 class="text-xl font-semibold text-primary mb-3">¡Encriptación Completa!</h2>
-                <p class="text-medium-text mb-4">Descarga el archivo ZIP con todos los archivos .enc y .key generados.</p>
-                <a id="download-link" href="#" download="encrypted_files.zip"
-                   class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                    Descargar Archivos Encriptados (.zip)
-                </a>
-                 <button id="reset-button" type="button" class="mt-6 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
-                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                    Encriptar Más Archivos
-                </button>
+            <!-- Tab Content Area -->
+            <div>
+                <!-- Encrypt Tab Content (No structural changes needed) -->
+                <div id="encrypt-tab-content" class="tab-content active">
+                    <h2 class="text-xl font-semibold text-center text-primary mb-4">Encriptar Soportes</h2>
+                    <form id="encryption-form" class="space-y-6">
+                         <div>
+                            <label for="public-key-input" class="block text-sm font-medium text-gray-700 mb-1">1. Selecciona Llave Pública RSA (.pem):</label>
+                            <input type="file" id="public-key-input" accept=".pem" required class="encrypt-input block w-full text-sm text-gray-500 border border-gray-300 rounded-md cursor-pointer file:border-0 file:py-2 file:px-4">
+                            <p id="public-key-status" class="status-text-xs hidden">Llave pública cargada.</p>
+                         </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">2. Selecciona Archivos a Encriptar (máx. 20):</label>
+                            <p class="text-xs text-gray-500 mb-2">Selecciona una carpeta completa.</p>
+                            <button type="button" id="select-folder-button" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm4 0a2 2 0 012-2h3.172a2 2 0 011.414.586l.828.828H14a1 1 0 011 1v1H5V6z" clip-rule="evenodd" /></svg>
+                                Seleccionar Carpeta (Encriptar)
+                            </button>
+                            <ul id="file-list" class="mt-2 text-sm text-gray-600"></ul>
+                            <p id="file-count-error" class="text-red-500 text-sm mt-1 hidden">Máximo 20 archivos permitidos.</p>
+                            <p id="folder-status" class="status-text-xs hidden">Archivos seleccionados.</p>
+                        </div>
+                        <div class="text-center pt-4">
+                            <button type="submit" id="encrypt-button" disabled class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-primary hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-7a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd" /></svg>
+                                Encriptar Archivos
+                            </button>
+                        </div>
+                    </form>
+                    <div id="encrypt-status-area" class="mt-6 text-center hidden">
+                         <div class="flex justify-center items-center mb-2"><div id="encrypt-spinner" class="spinner" style="display: none;"></div></div>
+                         <p id="encrypt-status-message" class="text-medium-text font-medium"></p>
+                         <p id="encrypt-error-message" class="text-red-600 text-sm font-semibold mt-1 hidden"></p>
+                         <p id="encrypt-warning-message" class="text-orange-600 text-sm font-semibold mt-1 hidden">La interfaz puede congelarse...</p>
+                    </div>
+                    <div id="encrypt-result-area" class="mt-6 text-center hidden">
+                         <h2 class="text-xl font-semibold text-primary mb-3">¡Encriptación Completa!</h2>
+                         <a id="encrypt-download-link" href="#" download="encrypted_files.zip" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-blue-700">... Descargar ZIP Encriptado</a>
+                         <button id="encrypt-reset-button" type="button" class="mt-6 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">... Encriptar Más</button>
+                    </div>
+                </div>
+
+                <!-- Decrypt Tab Content (Updated for Folder Selection) -->
+                <div id="decrypt-tab-content" class="tab-content">
+                    <h2 class="text-xl font-semibold text-center text-secondary mb-4">Desencriptar Soportes</h2>
+                    <form id="decryption-form" class="space-y-6">
+                        <div>
+                           <label for="decrypt-private-key-input" class="block text-sm font-medium text-gray-700 mb-1">1. Selecciona Llave Privada RSA (.pem):</label>
+                           <input type="file" id="decrypt-private-key-input" accept=".pem" required class="decrypt-input block w-full text-sm text-gray-500 border border-gray-300 rounded-md cursor-pointer file:border-0 file:py-2 file:px-4">
+                           <p id="decrypt-private-key-status" class="status-text-xs hidden">Llave privada seleccionada.</p>
+                           <p class="text-xs text-red-600 mt-1">¡Maneja este archivo con extremo cuidado!</p>
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">2. Selecciona Carpeta con Archivos a Desencriptar:</label>
+                            <p class="text-xs text-gray-500 mb-2">Se buscarán pares de archivos `.enc` y `.key` (máx. 20).</p>
+                            <button type="button" id="select-decrypt-folder-button" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm4 0a2 2 0 012-2h3.172a2 2 0 011.414.586l.828.828H14a1 1 0 011 1v1H5V6z" clip-rule="evenodd" /></svg>
+                                Seleccionar Carpeta (Desencriptar)
+                            </button>
+                            <ul id="decrypt-file-list" class="mt-2 text-sm text-gray-600"></ul> <!-- List to show paired files -->
+                            <p id="decrypt-file-count-error" class="text-red-500 text-sm mt-1 hidden">Máximo 20 pares de archivos permitidos.</p>
+                            <p id="decrypt-folder-status" class="status-text-xs hidden">Pares de archivos encontrados.</p>
+                        </div>
+
+                        <div class="text-center pt-4">
+                            <button type="submit" id="decrypt-button" disabled class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v7a2 2 0 002 2h10a2 2 0 002-2v-7a2 2 0 00-2-2h-1.5V5.5a4.5 4.5 0 00-9 0V9H7v8h6V9h-1V5.5a3 3 0 016 0V9h.5a.5.5 0 01.5.5v7a.5.5 0 01-.5.5H5a.5.5 0 01-.5-.5v-7a.5.5 0 01.5-.5h1.5V5.5a4.5 4.5 0 014.5-4.5z" clip-rule="evenodd" /><path d="M7 9H5v8h2V9zm6 0h-1v8h1V9z"/></svg>
+                                Desencriptar Archivos
+                            </button>
+                        </div>
+                    </form>
+                    <!-- Status/Result Area for Decryption -->
+                     <div id="decrypt-status-area" class="mt-6 text-center hidden">
+                         <div class="flex justify-center items-center mb-2"><div id="decrypt-spinner" class="spinner" style="display: none;"></div></div>
+                         <p id="decrypt-status-message" class="text-medium-text font-medium"></p>
+                         <p id="decrypt-error-message" class="text-red-600 text-sm font-semibold mt-1 hidden"></p>
+                         <p id="decrypt-warning-message" class="text-orange-600 text-sm font-semibold mt-1 hidden">La interfaz puede congelarse...</p>
+                    </div>
+                    <div id="decrypt-result-area" class="mt-6 text-center hidden">
+                         <h2 class="text-xl font-semibold text-secondary mb-3">¡Desencriptación Completa!</h2>
+                         <p class="text-medium-text mb-4">Descarga el archivo ZIP con los archivos originales.</p>
+                         <a id="decrypt-download-link" href="#" download="decrypted_files.zip" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                            Descargar ZIP Desencriptado
+                         </a>
+                         <button id="decrypt-reset-button" type="button" class="mt-6 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            Desencriptar Más
+                         </button>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
     <footer class="bg-white shadow-inner mt-10 py-6 text-center">
-        <p class="text-sm text-medium-text mb-4">...::::Desarrollado por José Luis Lizalda Torres:::..</p>
+        <p class="text-sm text-medium-text mb-4">...:::Desarrollado por José Luis Lizalda Torres:::..</p>
         <div class="flex justify-center items-center space-x-6">
-            <a href="mailto:lizaldatorres@gmail.com" title="Enviar correo electrónico" class="text-light-text hover:text-secondary footer-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                  <path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" />
-                  <path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" />
-                </svg>
-            </a>
-            <a href="https://www.linkedin.com/in/jose-luis-lizalda-torres-87992930/" target="_blank" rel="noopener noreferrer" title="LinkedIn" class="text-light-text hover:text-secondary footer-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                  <path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.25 6.5 1.75 1.75 0 016.5 8.25zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93-.91 0-1.38.73-1.38 1.93V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.28.94 3.28 4.44z" />
-                </svg>
-            </a>
-            <a href="https://x.com/cyberjosephLT" target="_blank" rel="noopener noreferrer" title="X (Twitter)" class="text-light-text hover:text-secondary footer-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-            </a>
+             <a href="mailto:lizaldatorres@gmail.com" title="Email" class="text-light-text hover:text-secondary footer-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M1.5 8.67v8.58a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3V8.67l-8.928 5.493a3 3 0 0 1-3.144 0L1.5 8.67Z" /><path d="M22.5 6.908V6.75a3 3 0 0 0-3-3h-15a3 3 0 0 0-3 3v.158l9.714 5.978a1.5 1.5 0 0 0 1.572 0L22.5 6.908Z" /></svg></a>
+             <a href="https://www.linkedin.com/in/jose-luis-lizalda-torres-87992930/" target="_blank" title="LinkedIn" class="text-light-text hover:text-secondary footer-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.25 6.5 1.75 1.75 0 016.5 8.25zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93-.91 0-1.38.73-1.38 1.93V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.28.94 3.28 4.44z" /></svg></a>
+             <a href="https://x.com/cyberjosephLT" target="_blank" title="X" class="text-light-text hover:text-secondary footer-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg></a>
         </div>
     </footer>
 
-    <!-- Link to the compiled JavaScript file -->
-    <!-- IMPORTANT: Compile index.tsx to index.js first! -->
-    <script type="module" src="index.js"></script>
+    <script type="module" src="index.js"></script> <!-- Link to compiled JS -->
 </body>
 </html>
 <link rel="stylesheet" href="index.css">

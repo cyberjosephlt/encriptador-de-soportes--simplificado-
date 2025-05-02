@@ -1,8 +1,9 @@
 
 {
-  "name": "Encriptador de Soportes (Simplificado)",
-  "version": "1.1.0",
-  "description": "Aplicación web simplificada para encriptar archivos según la Resolución 2284 de 2023, con mejoras de UI.",
-  "author": "JOSÉ LUIS LIZALDA TORRES",
+  "name": "Encriptador/Desencriptador de Soportes",
+  "version": "1.3.0",
+  "description": "Aplicación web para encriptar y desencriptar archivos (individuales o por carpeta) según la Resolución 2284 de 2023.",
+  "author": "José Luis Lizalda Torres",
   "license": "MIT"
 }
+
