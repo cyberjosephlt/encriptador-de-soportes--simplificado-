@@ -1,7 +1,8 @@
+
 {
   "name": "Encriptador/Desencriptador de Soportes",
-  "version": "1.3.2",
-  "description": "Aplicación web para encriptar y desencriptar archivos (individuales o por carpeta) según la Resolución 2284 de 2023. Button fix attempt 2.",
+  "version": "1.3.3",
+  "description": "Aplicación web para encriptar y desencriptar archivos (individuales o por carpeta) según la Resolución 2284 de 2023. Deferred private key validation.",
   "author": "José Luis Lizalda Torres",
   "license": "MIT"
 }
