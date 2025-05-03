@@ -1,26 +1,51 @@
 
 /* Global styles */
-body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animated Background */
+body.animated-background {
+  background: linear-gradient(270deg, #e0f2f7, #ffffff, #e6fffa); /* Light blue, white, light green */
+  background-size: 600% 600%;
+  animation: gradientAnimation 16s ease infinite;
+  position: relative; /* Needed for z-index */
+}
+
+@keyframes gradientAnimation {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Ensure main content and footer are above the animated background */
+main, footer {
+  position: relative;
+  z-index: 10;
+}
+
+
 /* Spinner */
-.spinner { border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #10B981; animation: spin 1s ease infinite; }
+.spinner {
+  border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px; border-radius: 50%;
+  border-left-color: #10B981; /* primary */
+  animation: spin 1s ease infinite;
+}
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
 /* Footer Icons */
 .footer-icon svg { transition: transform 0.2s ease-in-out; }
 .footer-icon:hover svg { transform: scale(1.15); }
-/* File Lists */
-#file-list, #decrypt-file-list { max-height: 10rem; overflow-y: auto; padding-left: 1.5rem; }
-#file-list li, #decrypt-file-list li { margin-bottom: 0.25rem; }
-/* Tab Button Styles */
-.tab-button { padding: 1rem 0.25rem; text-align: center; font-size: 0.875rem; font-weight: 500; border-bottom: 3px solid transparent; cursor: pointer; transition: border-color 0.2s ease, color 0.2s ease; color: #6B7280; }
-.tab-button:hover { border-color: #D1D5DB; }
-.tab-button.active { border-color: #10B981; font-weight: 600; color: #1F2937; }
-/* Tab Content Visibility */
-.tab-content { display: none; } .tab-content.active { display: block; }
-/* Input button styling */
-.encrypt-input::file-selector-button { background-color: #3B82F6; } /* secondary */
-.encrypt-input::file-selector-button:hover { background-color: #2563EB; }
-.decrypt-input::file-selector-button { background-color: #60A5FA; } /* Lighter blue */
-.decrypt-input::file-selector-button:hover { background-color: #3B82F6; } /* secondary on hover */
-/* Status text styling */
+
+/* File List */
+#file-list { max-height: 10rem; overflow-y: auto; padding-left: 1.5rem; }
+#file-list li { margin-bottom: 0.25rem; }
+
+/* Status text */
 .status-text-xs { font-size: 0.75rem; margin-top: 0.25rem; color: #059669; }
+
+/* Removed Tab Styles */
+
 
